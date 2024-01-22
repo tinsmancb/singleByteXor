@@ -34,14 +34,7 @@ def read_ctext_file(key: bytearray, fname: str) -> str:
         return ptext
 
 def main():
-    ptext = 'A Turing machine is a mathematical model of computation describing an abstract machine that manipulates symbols on a strip of tape according to a table of rules. Despite the model\'s simplicity, it is capable of implementing any computer algorithm.'
-    pbytes = bytearray(ptext, 'utf-8')
     key = bytearray('GRAYSON', 'utf-8')
-
-    ctext = vigenere(pbytes, key)
-    print(ctext.hex())
-
-    write_ctext_file(ptext, key, 'ctext.bin')
     print(read_ctext_file(key, 'ctext.bin').decode('utf-8'))
 
 
