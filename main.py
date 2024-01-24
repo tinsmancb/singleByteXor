@@ -33,9 +33,9 @@ def read_ctext_file(key: bytearray, fname: str) -> str:
         ptext = vigenere(cbytes, key)
         return ptext
 
+
 def main():
-    key = bytearray('GRAYSON', 'utf-8')
-    print(read_ctext_file(key, 'ctext.bin').decode('utf-8'))
+    print(read_ctext_file(bytearray([0b00000000]), 'breakme.bin').decode('utf-8'))
 
 
 if __name__ == '__main__':
