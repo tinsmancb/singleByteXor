@@ -63,21 +63,7 @@ def gen_english_ranks(infile='pg2701.txt') -> bytearray:
 
 
 def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> (int, bytearray):
-    best_key = 0b00000000
-    best_ptext = cbytes
-    pranks = byte_ranks(best_ptext)
-    best_score = english_score(pranks, eng_ranks)
-
-    for key in range(256):
-        ptext = vigenere(cbytes, [key])
-        pranks = byte_ranks(ptext)
-        pscore = english_score(pranks, eng_ranks)
-        if pscore < best_score:
-            best_score = english_score(pranks, eng_ranks)
-            best_key = key
-            best_ptext = ptext
-
-    return best_key, best_ptext
+    pass  # TODO: Implement this!
 
 
 def main():
