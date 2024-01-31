@@ -36,9 +36,9 @@ def read_ctext_file(key: bytearray, fname: str) -> bytearray:
 
 
 def byte_counts(data: bytearray) -> Dict[int, int]:
-    out = {b: 0 for b in data}
+    out = {b: 0 for b in data}  # Initialize a count of zero for each byte that appears in the data.
     for b in data:
-        out[b] += 1
+        out[b] += 1  # Count how many times each byte appears.
     return out
 
 
