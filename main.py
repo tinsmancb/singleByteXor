@@ -1,6 +1,7 @@
 from itertools import cycle
 from typing import Dict
 
+
 def singleByteXor(text: bytearray, b: int) -> bytearray:
     out = bytearray()
 
@@ -27,7 +28,7 @@ def write_ctext_file(ptext: str, key: bytearray, fname: str) -> None:
         f.write(cbytes)
 
 
-def read_ctext_file(key: bytearray, fname: str) -> str:
+def read_ctext_file(key: bytearray, fname: str) -> bytearray:
     with open(fname, 'rb') as f:
         cbytes = bytearray(f.read())
         ptext = vigenere(cbytes, key)
@@ -35,54 +36,48 @@ def read_ctext_file(key: bytearray, fname: str) -> str:
 
 
 def byte_counts(data: bytearray) -> Dict[int, int]:
-    out = {}
+    out = {b: 0 for b in data}
     for b in data:
-        if b in out:
-            out[b] += 1
-        else:
-            out[b] = 1
+        out[b] += 1
     return out
 
 
-def byte_ranks(data):
-    counts = dict(sorted(byte_counts(data).items()))
-    counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
-    return bytearray([k for k, v in counts.items()])
+def byte_ranks(data: bytearray) -> bytearray:
+    counts = sorted(byte_counts(data).items(),  # Convert dictionary to a list of tuples
+                    key=lambda item: item[1],  # Sort on the second item in the tuple (the count)
+                    reverse=True  # Reverse order (more common bytes first)
+                    )
+    return bytearray([k[0] for k in counts])  # Throw away the counts, return bytes as a bytearray
 
 
-def score(test, english, penalty=100):
-    acc = 0
-    for b in test:
-        try:
-            acc += english.index(b)
-        except ValueError:
-            acc += penalty
-    return acc
+def english_score(test: bytearray, english: bytearray, penalty=1000) -> int:
+    return sum([english.index(b) if b in english  # The score of a byte is its position in the english ranks
+                else penalty  # If a character does not appear in english then assign a high score
+                for b in test])  # Add up the scores from each individual byte in test
 
 
-def gen_english_ranks(infile='pg2701.txt'):
+def gen_english_ranks(infile='pg2701.txt') -> bytearray:
     with open('pg2701.txt', 'rb') as f:
         data = f.read()
-    counts = dict(sorted(byte_counts(data).items()))
-    counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
-    return bytearray([k for k, v in counts.items()])
+    return byte_ranks(data)
 
 
-def break_single_byte(cbytes, eng_ranks):
-    true_key = 0b00000000
-    true_ptext = cbytes
-    pranks = byte_ranks(true_ptext)
-    pscore = score(pranks, eng_ranks)
+def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> (int, bytearray):
+    best_key = 0b00000000
+    best_ptext = cbytes
+    pranks = byte_ranks(best_ptext)
+    best_score = english_score(pranks, eng_ranks)
 
     for key in range(256):
         ptext = vigenere(cbytes, [key])
         pranks = byte_ranks(ptext)
-        if score(pranks, eng_ranks) < pscore:
-            pscore = score(pranks, eng_ranks)
-            true_key = key
-            true_ptext = ptext
+        pscore = english_score(pranks, eng_ranks)
+        if pscore < best_score:
+            best_score = english_score(pranks, eng_ranks)
+            best_key = key
+            best_ptext = ptext
 
-    return true_key, true_ptext
+    return best_key, best_ptext
 
 
 def main():
@@ -90,6 +85,7 @@ def main():
     eng_ranks = gen_english_ranks()
     key, message = break_single_byte(cbytes, eng_ranks)
     print(message.decode('utf-8'))
+
 
 if __name__ == '__main__':
     main()
