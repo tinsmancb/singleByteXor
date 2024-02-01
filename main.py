@@ -63,7 +63,7 @@ def gen_english_ranks(infile='pg2701.txt') -> bytearray:
 
 
 def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> (int, bytearray):
-    pass  # TODO: Implement this!
+    return 0, b''  # TODO: Implement This!
 
 
 def main():
