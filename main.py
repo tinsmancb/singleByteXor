@@ -81,11 +81,8 @@ def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> (int, bytearra
 
 
 def main():
-    cbytes = read_ctext_file([0b00000000], 'breakme.bin')
-    eng_ranks = gen_english_ranks()
-    key, message = break_single_byte(cbytes, eng_ranks)
-    print(message.decode('utf-8'))
-
+    ptext = read_ctext_file(bytearray([0x00, 0x00, 0x00, 0x00]), 'breakme2.bin')
+    print(ptext.decode('utf-8'))
 
 if __name__ == '__main__':
     main()
