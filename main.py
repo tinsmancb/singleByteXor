@@ -80,9 +80,32 @@ def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> (int, bytearra
     return best_key, best_ptext
 
 
+def break_fixed_len_vigenere(cbytes: bytearray, eng_ranks: bytearray, key_len: int) -> (bytearray, bytearray):
+    partitions = [bytearray() for _ in range(key_len)]
+
+    for i, b in enumerate(cbytes):
+        partitions[i % key_len].append(b)
+
+    broken_partitions = [break_single_byte(b, eng_ranks) for b in partitions]
+    key = bytearray([x[0] for x in broken_partitions])
+    return key, vigenere(cbytes, key)
+
+
+def break_vigenere(cbytes: bytearray, eng_ranks: bytearray, max_key_len: int = 20):
+    candidate_plaintexts = [break_fixed_len_vigenere(cbytes, eng_ranks, i) for i in range(1, max_key_len)]
+    candidate_plaintexts = [(key, ptext, english_score(ptext, eng_ranks)) for key, ptext in candidate_plaintexts]
+    for key, ptext, score in candidate_plaintexts:
+        print(f'{key}: {score}')
+    return min(candidate_plaintexts, key=lambda x: x[2])[0:2]
+
+
 def main():
-    ptext = read_ctext_file(bytearray([0x00, 0x00, 0x00, 0x00]), 'breakme2.bin')
+    ctext = read_ctext_file(bytearray([0x00, 0x00, 0x00, 0x00]), 'breakme2.bin')
+    eng_ranks = gen_english_ranks()
+    key, ptext = break_vigenere(ctext, eng_ranks)
+    print(key)
     print(ptext.decode('utf-8'))
+
 
 if __name__ == '__main__':
     main()
