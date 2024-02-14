@@ -1,5 +1,5 @@
 from itertools import cycle
-from typing import Dict
+from typing import Dict, Tuple
 
 
 def singleByteXor(text: bytearray, b: int) -> bytearray:
@@ -57,12 +57,12 @@ def english_score(test: bytearray, english: bytearray, penalty=1000) -> int:
 
 
 def gen_english_ranks(infile='pg2701.txt') -> bytearray:
-    with open('pg2701.txt', 'rb') as f:
+    with open(infile, 'rb') as f:
         data = f.read()
-    return byte_ranks(data)
+    return byte_ranks(bytearray(data))
 
 
-def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> (int, bytearray):
+def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> Tuple[int, bytearray]:
     best_key = 0b00000000
     best_ptext = cbytes
     p_ranks = byte_ranks(cbytes)
@@ -80,7 +80,7 @@ def break_single_byte(cbytes: bytearray, eng_ranks: bytearray) -> (int, bytearra
     return best_key, best_ptext
 
 
-def break_fixed_len_vigenere(cbytes: bytearray, eng_ranks: bytearray, key_len: int) -> (bytearray, bytearray):
+def break_fixed_len_vigenere(cbytes: bytearray, eng_ranks: bytearray, key_len: int) -> Tuple[bytearray, bytearray]:
     partitions = [bytearray() for _ in range(key_len)]
 
     for i, b in enumerate(cbytes):
@@ -93,10 +93,10 @@ def break_fixed_len_vigenere(cbytes: bytearray, eng_ranks: bytearray, key_len: i
 
 def break_vigenere(cbytes: bytearray, eng_ranks: bytearray, max_key_len: int = 20):
     candidate_plaintexts = [break_fixed_len_vigenere(cbytes, eng_ranks, i) for i in range(1, max_key_len)]
-    candidate_plaintexts = [(key, ptext, english_score(ptext, eng_ranks)) for key, ptext in candidate_plaintexts]
-    for key, ptext, score in candidate_plaintexts:
+    scored_plaintexts = [(key, ptext, english_score(ptext, eng_ranks)) for key, ptext in candidate_plaintexts]
+    for key, ptext, score in scored_plaintexts:
         print(f'{key}: {score}')
-    return min(candidate_plaintexts, key=lambda x: x[2])[0:2]
+    return min(scored_plaintexts, key=lambda x: x[2])[0:2]
 
 
 def main():
