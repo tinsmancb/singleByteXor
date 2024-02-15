@@ -91,12 +91,19 @@ def break_fixed_len_vigenere(cbytes: bytearray, eng_ranks: bytearray, key_len: i
     return key, vigenere(cbytes, key)
 
 
-def break_vigenere(cbytes: bytearray, eng_ranks: bytearray, max_key_len: int = 20):
-    candidate_plaintexts = [break_fixed_len_vigenere(cbytes, eng_ranks, i) for i in range(1, max_key_len)]
-    scored_plaintexts = [(key, ptext, english_score(ptext, eng_ranks)) for key, ptext in candidate_plaintexts]
-    for key, ptext, score in scored_plaintexts:
-        print(f'{key}: {score}')
-    return min(scored_plaintexts, key=lambda x: x[2])[0:2]
+def break_vigenere(cbytes: bytearray, eng_ranks: bytearray, max_key_len: int = 60) \
+        -> Tuple[bytearray, bytearray]:
+    min_score = float('inf')
+    min_key_len = 1
+    for key_len in range(1, min(len(cbytes)//2, max_key_len+1)):
+        first_n_bits = cbytes[:key_len]
+        second_n_bits = cbytes[key_len:2*key_len]
+        score = sum([(f ^ s).bit_count() for f, s in zip(first_n_bits, second_n_bits)])/key_len
+        if score < min_score:
+            min_score = score
+            min_key_len = key_len
+
+    return break_fixed_len_vigenere(cbytes, eng_ranks, min_key_len)
 
 
 def main():
