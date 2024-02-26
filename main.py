@@ -1,5 +1,6 @@
 from itertools import cycle
 from typing import Dict, Tuple
+import matplotlib.pyplot as plt
 
 
 def singleByteXor(text: bytearray, b: int) -> bytearray:
@@ -91,14 +92,27 @@ def break_fixed_len_vigenere(cbytes: bytearray, eng_ranks: bytearray, key_len: i
     return key, vigenere(cbytes, key)
 
 
+def key_length_score_english(cbytes: bytearray, eng_ranks: bytearray, key_len: int) -> int:
+    key, pbytes = break_fixed_len_vigenere(cbytes, eng_ranks, key_len)
+    return english_score(pbytes, eng_ranks)
+
+
+def key_length_score(cbytes: bytearray, key_len: int) -> float:
+    if key_len > len(cbytes)//2:
+        raise ValueError(f'Key length {key_len} is longer than half the message size {len(cbytes)}')
+    if key_len < 1:
+        raise ValueError(f'Key length {key_len} must be at least 1.')
+    first_n_bits = cbytes[:key_len]
+    second_n_bits = cbytes[key_len:2*key_len]
+    return sum([(f ^ s).bit_count() for f, s in zip(first_n_bits, second_n_bits)])/key_len
+
+
 def break_vigenere(cbytes: bytearray, eng_ranks: bytearray, max_key_len: int = 60) \
         -> Tuple[bytearray, bytearray]:
     min_score = float('inf')
     min_key_len = 1
     for key_len in range(1, min(len(cbytes)//2, max_key_len+1)):
-        first_n_bits = cbytes[:key_len]
-        second_n_bits = cbytes[key_len:2*key_len]
-        score = sum([(f ^ s).bit_count() for f, s in zip(first_n_bits, second_n_bits)])/key_len
+        score = key_length_score(cbytes, key_len)
         if score < min_score:
             min_score = score
             min_key_len = key_len
@@ -114,7 +128,18 @@ def main():
     print(ptext.decode('utf-8'))
 
 
+def plot_key_length_scores():
+    ctext = read_ctext_file(bytearray([0x00, 0x00, 0x00, 0x00]), 'breakme2.bin')
+    eng_ranks = gen_english_ranks()
+    scores_english = [key_length_score_english(ctext, eng_ranks, i) for i in range(1, 60)]
+    scores_popcount = [key_length_score(ctext, i) for i in range(1, 60)]
+    fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
+    ax1.plot(scores_popcount, 'o')
+    ax2.plot(scores_english, 'o')
+    fig.show()
+
+
 if __name__ == '__main__':
-    main()
+    plot_key_length_scores()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
