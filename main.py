@@ -128,18 +128,22 @@ def main():
     print(ptext.decode('utf-8'))
 
 
-def plot_key_length_scores():
+def plot_key_length_scores(max_key_len=None):
     ctext = read_ctext_file(bytearray([0x00, 0x00, 0x00, 0x00]), 'breakme2.bin')
     eng_ranks = gen_english_ranks()
-    scores_english = [key_length_score_english(ctext, eng_ranks, i) for i in range(1, 60)]
-    scores_popcount = [key_length_score(ctext, i) for i in range(1, 60)]
+    if max_key_len is None:
+        max_key_len = len(ctext)//2
+    scores_english = [key_length_score_english(ctext, eng_ranks, i) for i in range(1, max_key_len)]
+    scores_popcount = [key_length_score(ctext, i) for i in range(1, max_key_len)]
     fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
     ax1.plot(scores_popcount, 'o')
+    ax1.hlines(scores_popcount[3], 1, max_key_len, colors='C1', linestyles='dashed')
     ax2.plot(scores_english, 'o')
+    ax2.hlines(scores_english[3], 1, max_key_len, colors='C1', linestyles='dashed')
     fig.show()
 
 
 if __name__ == '__main__':
-    plot_key_length_scores()
+    plot_key_length_scores(60)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
