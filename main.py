@@ -102,10 +102,10 @@ def key_length_score(cbytes: bytearray, key_len: int) -> float:
         raise ValueError(f'Key length {key_len} is longer than half the message size {len(cbytes)}')
     if key_len < 1:
         raise ValueError(f'Key length {key_len} must be at least 1.')
-    first_n_bits = cbytes[:key_len] # The first N bytes of the message
-    second_n_bits = cbytes[key_len:2*key_len] # The second N bytes of the message
+    first_n_bits = cbytes[:key_len]  # The first N bytes of the message
+    second_n_bits = cbytes[key_len:2*key_len]  # The second N bytes of the message
     return sum(  # Add up for each pair of bytes
-        [(f ^ s).bit_count()  # Use XOR to detect differing bytes, then use bit_count to find how many bits differ.
+        [(f ^ s).bit_count()  # Use XOR to detect differing bits, then use bit_count to find how many bits differ.
          for f, s in zip(first_n_bits, second_n_bits)])/key_len  # Normalize by dividing by key length.
 
 
